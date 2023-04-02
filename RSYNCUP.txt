@@ -1,0 +1,51 @@
+SOURCE:-
+mclient mapi:monetdb://lnx1925.ch3.prod.i.com:50522/DB_UKIRI_P_B
+
+/monet_binaries/MonetDB-11.43.19_PY/bin/ 
+/monet_data01/DBFARM_UKIRI_P_B/DB_UKIRI_P_B
+
+TARGET:-
+mclient mapi:monetdb://lnx1651.ch3.prod.i.com:50521/DB_UKIRI_P_A
+mclient mapi:monetdb://lnx1650.ch3.prod.i.com:50521/DB_UKIRI_P_A
+
+/monet_binaries/MonetDB-11.43.19_PY/bin 
+/monet_data01/DBFARM_UKIRI_P_A/DB_UKIRI_P_A
+
+/monet_data01/DBFARM_UKIRI_P_A/DB_UKIRI_P_A
+ 
+/monet_binaries/MonetDB-11.43.19_PY/bin/monetdb -p 50521 stop DB_UKIRI_P_A
+
+IN SOURCE lnx1925.ch3.prod.i.com ONLINE:-
+====================================
+nohup /usr/bin/rsync -aHWv --progress --delete /monet_data01/DBFARM_UKIRI_P_B/DB_UKIRI_P_B lnx1651.ch3.prod.i.com:/monet_data01/DBFARM_UKIRI_P_A > DBFARM_UKIRI_P_A_sync.out &
+  
+nohup /usr/bin/rsync -aHv --progress --delete /monet_data01/DBFARM_UKIRI_P_B/DB_UKIRI_P_B lnx1651.ch3.prod.i.com:/monet_data01/DBFARM_UKIRI_P_A > DBFARM_UKIRI_P_A_sync.out &
+  
+IN TARGET lnx1651.ch3.prod.i.com:-
+=======================================
+/monet_binaries/MonetDB-11.43.19_PY/bin/monetdb -p 50521 stop DB_UKIRI_P_A
+mv /monet_data01/DBFARM_UKIRI_P_A/DB_UKIRI_P_A /monet_data01/DBFARM_UKIRI_P_A/DB_UKIRI_P_A_15JAN2023_BKP
+/monet_binaries/MonetDB-11.43.19_PY/bin/monetdb -p 50521 start  DB_UKIRI_P_B
+/monet_binaries/MonetDB-11.43.19_PY/bin/monetdb -p 50521 stop  DB_UKIRI_P_B
+mv /monet_data01/DBFARM_UKIRI_P_A/DB_UKIRI_P_B /monet_data01/DBFARM_UKIRI_P_A/DB_UKIRI_P_A
+/monet_binaries/MonetDB-11.43.19_PY/bin/monetdb -p 50521 start DB_UKIRI_P_A
+/monet_binaries/MonetDB-11.43.19_PY/bin/monetdb -p 50521 status DB_UKIRI_P_A
+
+IN SOURCE lnx1651.ch3.prod.i.com TO lnx1650.ch3.prod.i.com OFFLINE :-
+=====================================================================
+nohup /usr/bin/rsync -aHWv --progress --delete /monet_data01/DBFARM_UKIRI_P_A/DB_UKIRI_P_A lnx1650.ch3.prod.i.com:/monet_data01/DBFARM_UKIRI_P_A > DBFARM_UKIRI_P_A_sync.out &
+
+nohup /usr/bin/rsync -aHv --progress --delete /monet_data01/DBFARM_UKIRI_P_A/DB_UKIRI_P_A lnx1650.ch3.prod.i.com:/monet_data01/DBFARM_UKIRI_P_A > DBFARM_UKIRI_P_A_sync.out &
+
+
+
+After sync-up INCREMENTAL SYNC-UP by removed W from -aHWv 
+nohup /usr/bin/rsync -aHv --progress --delete /monet_data01/DBFARM_UKIRI_P_A/DB_UKIRI_P_A lnx1650.ch3.prod.i.com:/monet_data01/DBFARM_UKIRI_P_A > DBFARM_UKIRI_P_A_sync.out &
+
+IN TARGET lnx1650.ch3.prod.i.com:-
+=======================================
+Execute the below steps in lnx1650.ch3.prod.i.com once the rsync is completed on lnx1651.ch3.prod.i.com 
+/monet_binaries/MonetDB-11.43.19_PY/bin/monetdb -p 50521 stop DB_UKIRI_P_A  ==> completed
+mv /monet_data01/DBFARM_UKIRI_P_A/DB_UKIRI_P_A /monet_data01/DBFARM_UKIRI_P_A/DB_UKIRI_P_A_29JUNE2022_BKP ==> completed
+/monet_binaries/MonetDB-11.43.19_PY/bin/monetdb -p 50521 start DB_UKIRI_P_A
+/monet_binaries/MonetDB-11.43.19_PY/bin/monetdb -p 50521 status DB_UKIRI_P_A
